@@ -10,16 +10,15 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 
 
-
-class PetsListAdapter(val context: Context?, var   imgList: MutableMap<String, PetsModel>?) : BaseAdapter() {
+class PetsListAdapter(val context: Context?, var imgList: MutableMap<String, PetsModel>?) :
+    BaseAdapter() {
 
     internal var adapterList = mutableMapOf<String, PetsModel>()
 
 
-
     init {
 
-       adapterList = imgList!!
+        adapterList = imgList!!
 
     }
 
@@ -48,9 +47,9 @@ class PetsListAdapter(val context: Context?, var   imgList: MutableMap<String, P
             vh = view.tag as ListRowHolder
         }
 
-         vh.text_PetName.text =adapterList. values.elementAt(position).petTitle
+        vh.text_PetName.text = adapterList.values.elementAt(position).petTitle
 
-        vh.img_PetPic.setImageBitmap(adapterList. values.elementAt(position).bm)
+        vh.img_PetPic.setImageBitmap(adapterList.values.elementAt(position).bm)
 
 
         return view
@@ -58,12 +57,9 @@ class PetsListAdapter(val context: Context?, var   imgList: MutableMap<String, P
 }
 
 
-
-
 class ListRowHolder(row: View?) {
     val text_PetName: TextView
     val img_PetPic: AppCompatImageView
-
 
     init {
         this.text_PetName = row?.findViewById(R.id.text_PetName) as TextView

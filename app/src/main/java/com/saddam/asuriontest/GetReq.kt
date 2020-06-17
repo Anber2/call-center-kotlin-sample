@@ -17,8 +17,6 @@ class GetReq(asyncResponse: AsyncResponse) : AsyncTask<String, String, String>()
 
     var delegate: AsyncResponse? = null
 
-    var ssl: SSLSession? = null
-
     init {
         delegate = asyncResponse
     }

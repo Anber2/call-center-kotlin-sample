@@ -17,25 +17,24 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
 
-    internal var petsListAdapter: PetsListAdapter? = null
+    var petsListAdapter: PetsListAdapter? = null
 
-    val petsListModel = mutableListOf<PetsModel>()
     var imgList = mutableMapOf<String, PetsModel>()
 
     var icon: Bitmap? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         init()
 
         getConfigData()
 
-        getPetsList()
+        getPetsList()// this fun. will call pits data.
     }
 
-
+    // this fun. will initialize a Bitmap 'icon' and it will bt used when the pit image from network is not load or delayed
     private fun init() {
 
         icon = BitmapFactory.decodeResource(
@@ -54,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         pitsListView.setOnItemClickListener { adapterView, view, i, l ->
 
             val myIntent = Intent(this, WebViewActivity::class.java)
-            myIntent.putExtra("content_url", petsListModel.get(i).petUrl)
+            myIntent.putExtra("content_url", imgList.values.elementAt(i).petUrl)
             startActivity(myIntent)
 
         }
@@ -62,9 +61,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // fun isWorkingTime() will be called when user click on chat or call button
     private fun isWorkingTime() {
 
-        if (isWithInWorkHours() && isWithInWorkDays()) {
+        if (isWithInWorkDaysAndHours()) {
 
             showAlert("Thank you for getting in touch with us. We’ll get back to you as soon as possible")
 
@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // fun showAlert(msg: String) will be called when user click on chat or call button to display an AlertDialog
     private fun showAlert(msg: String) {
 
 
@@ -87,38 +88,25 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun isWithInWorkDays(): Boolean {
+    private fun isWithInWorkDaysAndHours(): Boolean {
 
         val calendar = Calendar.getInstance()
         val day = calendar.get(Calendar.DAY_OF_WEEK)
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
 
-        when (day) {
-            Calendar.SATURDAY -> {
-                return false
+        if (day >= Calendar.MONDAY && day <= Calendar.FRIDAY) {
 
+            if (hour in 9..18) {
+                return true
             }
-            Calendar.SUNDAY -> {
-
-                return false
-
-            }
-
+        } else {
+            return false
         }
 
-        return true
-
+        return false
     }
 
-    private fun isWithInWorkHours(): Boolean {
-
-        val cal = Calendar.getInstance()
-        cal.time = Date()
-        val hour = cal.get(Calendar.HOUR_OF_DAY)
-        return hour in 8..18
-
-    }
-
-
+    // this fun. will call working days and hours. It will call AsyncTask in GetReq.kt which uses okhttp3 for networking
     private fun getConfigData() {
 
 
@@ -126,7 +114,6 @@ class MainActivity : AppCompatActivity() {
             GetReq(
                 object : AsyncResponse {
                     override fun processFinish(output: Any) {
-
 
                         if (output != "") {
 
@@ -136,17 +123,34 @@ class MainActivity : AppCompatActivity() {
 
                                 val isChatEnabled = jsonObject.getBoolean("isChatEnabled")
                                 val isCallEnabled = jsonObject.getBoolean("isCallEnabled")
+                                //val workHours = jsonObject.getString("workHours")
+
+
+                                //////////////////////
+                                // As config file, workHours = "M-F 9:00 - 18:00" ???
+                                //
+                                // 'M-F' refers for working days which means Monday to friday,
+                                // but it's not possible to fitch. It would be much better to fitch if the json data was like, for example :
+                                // "work_days" : {"from" : "Monday", "to" : "Friday" }
+                                // "work_hours" : {"from" : "9:00", "to" : "18:00" }
+                                //
+                                // The provided design shows that the working hours are from 10:00 to 18:00,
+                                // not from 9:00 as in the json file.
+                                //
+                                // Since "workHours" is not suitable to fitch ,
+                                // working days and hours will be calculated locally.
+                                //////////////////////
+
 
                                 if (!isChatEnabled) {
 
-                                    runOnUiThread {
-
+                                    this@MainActivity.runOnUiThread {
                                         buttonChat!!.visibility = View.GONE
-
                                     }
                                 }
                                 if (!isCallEnabled) {
-                                    runOnUiThread {
+
+                                    this@MainActivity.runOnUiThread {
                                         buttonCall!!.visibility = View.GONE
                                     }
                                 }
@@ -166,6 +170,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // this fun. will call working days and hours. It will call AsyncTask in GetReq.kt which uses okhttp3 for networking
     private fun getPetsList() {
 
 
@@ -190,7 +195,6 @@ class MainActivity : AppCompatActivity() {
 
                                     val content_url = jsonObject.getString("content_url")
 
-
                                     imgList.put(
                                         title, PetsModel(
                                             i,
@@ -201,19 +205,17 @@ class MainActivity : AppCompatActivity() {
                                         )
                                     )
 
+                                    // This fun will download pits images instead of Glid or picasso
                                     getPitImage(image_url, title)
-
-
                                 }
 
-                                runOnUiThread {
+                                this@MainActivity.runOnUiThread {
 
                                     petsListAdapter =
                                         PetsListAdapter(this@MainActivity, imgList)
                                     pitsListView.adapter = petsListAdapter
 
                                 }
-
 
                             } catch (ex: IOException) {
                                 ex.printStackTrace()
@@ -228,6 +230,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // getPitImage  will update the downloaded pits images to  (mutableMapOf) . It will call AsyncTask in DownloadImageTask.kt which uses okhttp3 for networking
     private fun getPitImage(imageUrl: String, key: String) {
 
         val asyncTask =
@@ -235,14 +238,14 @@ class MainActivity : AppCompatActivity() {
                 object : AsyncResImgDown {
                     override fun processFinish(output: Bitmap) {
 
-
                         if (null != output) {
 
-
+                            // a double check to avoid more exceptions
                             if (imgList.keys.contains(key)) {
-                                imgList!![key]!!.bm = output ?: icon
 
-                                runOnUiThread {
+                                imgList!![key]!!.bm = output
+
+                                this@MainActivity.runOnUiThread {
                                     petsListAdapter!!.notifyDataSetChanged()
                                 }
                             }

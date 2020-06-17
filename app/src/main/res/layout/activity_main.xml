@@ -18,11 +18,11 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="10dp"
-            android:weightSum="3">
+            android:weightSum="2">
 
         <Button
                 android:id="@+id/buttonChat"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginRight="10dp"
                 android:background="#1E90FF"
@@ -31,18 +31,20 @@
                 android:textColor="#fff"
                 android:layout_weight="1"
 
+                android:visibility="visible"
                 android:textSize="24sp" />
 
 
 
         <Button
                 android:id="@+id/buttonCall"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="10dp"
                 android:background="#4FFF33"
                 android:text="Call"
                 android:layout_weight="1"
+                android:visibility="visible"
 
                 android:textAllCaps="false"
                 android:textColor="#fff"
