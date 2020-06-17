@@ -29,14 +29,17 @@ class MainActivity : AppCompatActivity() {
 
         init()
 
+        // json data were uploaded to https://jsonbin.io/
+
         getConfigData()
 
-        getPetsList()// this fun. will call pits data.
+        getPetsList()
     }
 
-    // this fun. will initialize a Bitmap 'icon' and it will bt used when the pit image from network is not load or delayed
+    // initialize a Bitmap and handle onClickListener
     private fun init() {
 
+       // initialize a Bitmap 'icon' and it will bt used when the pit image from network is not load or delayed
         icon = BitmapFactory.decodeResource(
             this@MainActivity.getResources(),
             R.drawable.ic_launcher_foreground
