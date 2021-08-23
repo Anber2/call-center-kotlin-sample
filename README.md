@@ -1,6 +1,3 @@
-# Asurion Code Test 
-This is the source code of Asurion code test for Android.
-
 # Project info:
 
  - Coding language : kotlin
